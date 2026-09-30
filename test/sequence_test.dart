@@ -8,6 +8,24 @@ Duration _s(num s) => Duration(microseconds: (s * 1000000).round());
 void main() {
   const seq = defaultSequence;
 
+  group('grounding', () {
+    test('dos frases de 5 s: primero el tacto, luego un sonido; mismo verbo que el escaneo', () {
+      final grounding = seq.steps.firstWhere(
+        (s) => s.kind == StepKind.grounding,
+      );
+      expect(grounding.segments, hasLength(2));
+      expect(grounding.segments.map((s) => s.duration), everyElement(_s(5)));
+      expect(grounding.segments[0].text, contains('tocan'));
+      expect(grounding.segments[1].text, contains('sonido'));
+      for (final s in grounding.segments) {
+        expect(s.text, startsWith('Nota'));
+        expect(s.text!.toLowerCase(), isNot(contains('ves')));
+      }
+      expect(seq.positionAt(_s(79.999)).segmentIndex, 0);
+      expect(seq.positionAt(_s(80)).segmentIndex, 1);
+    });
+  });
+
   group('temporización', () {
     test('la secuencia dura exactamente 90 s', () {
       expect(seq.total, const Duration(seconds: 90));

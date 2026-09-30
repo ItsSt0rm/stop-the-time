@@ -13,8 +13,9 @@ const homeScale = 200 / circleBoxSize;
 /// Escala del punto tenue al que se contrae el círculo en la entrada.
 const dotScale = 0.06;
 
-/// Escala del círculo en reposo y en el punto máximo de la inhalación.
-const restScale = 0.6;
+/// Escala del círculo en reposo (= fin de la exhalación) y en el punto máximo de la inhalación.
+/// El reposo es pequeño para que la inhalación se vea completa: de pequeño a lleno.
+const restScale = 0.4;
 const fullScale = 1.0;
 
 const _curve = Curves.easeInOutSine;

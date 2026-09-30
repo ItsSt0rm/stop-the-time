@@ -138,12 +138,11 @@ const defaultSequence = Sequence([
     Segment(Duration(seconds: 5), text: 'Nota tus manos.'),
     Segment(Duration(seconds: 5), text: 'Nota tu abdomen.'),
   ]),
-  // 75–85 s
+  // 75–85 s: continúa el escaneo hacia fuera (cuerpo → contacto → entorno), mismo verbo.
+  // Sin "algo que ves": obligaría a apartar la vista de la pantalla mientras se lee.
   SequenceStep(StepKind.grounding, [
-    Segment(
-      Duration(seconds: 10),
-      text: 'Nombra un sonido,\nalgo que ves\ny algo que tocas.',
-    ),
+    Segment(Duration(seconds: 5), text: 'Nota lo que tocan tus manos.'),
+    Segment(Duration(seconds: 5), text: 'Nota un sonido a tu alrededor.'),
   ]),
   // 85–90 s
   SequenceStep(StepKind.cierre, [
