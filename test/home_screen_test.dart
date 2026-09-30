@@ -13,11 +13,16 @@ void main() {
     expect(find.text('Para'), findsOneWidget);
 
     await tester.tap(find.byKey(HomeScreen.startButtonKey));
-    await tester.pumpAndSettle();
+    // La secuencia dura 90 s y nunca "settles": avanzamos tiempo concreto
+    // (transición de 600 ms + margen).
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
     expect(find.byType(SequenceScreen), findsOneWidget);
 
-    await tester.tap(find.text('Salir'));
-    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(SequenceScreen.exitButtonKey));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(SequenceScreen), findsNothing);
     expect(find.byType(HomeScreen), findsOneWidget);
   });
 }
