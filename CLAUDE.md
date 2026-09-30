@@ -42,6 +42,8 @@ no dispersa en widgets, para poder testear la temporización.
 - `pubspec.lock` se versiona. Nada de rangos abiertos tipo `any`. Revisar el diff del lock en cada `pub upgrade`.
 - `vibration` NO tiene publisher verificado en pub.dev (mantenedor individual): versión fijada por el lock,
   código Android revisado (usa `createWaveform` con `USAGE_ALARM`). Revisar su diff antes de actualizarlo.
+- Háptica validada en el A55: ancla = pulso que sube/baja + eco; respiración = un pulso simple de 70 ms en
+  cada extremo del círculo (las rampas largas se sentían anticlimáticas). Sonido del ancla: preset "soplo".
 - Audio: solo `AssetSource` (nunca `UrlSource`/`setSourceUrl`). El ancla se genera con
   `scripts/generate_anchor_sound.py` (determinista; su sha256 lo fija `test/anchor_asset_test.dart`).
 - Vibración y sonido pasan por la interfaz `SensoryCues`; los tests usan `FakeCues` (test/flutter_test_config.dart).

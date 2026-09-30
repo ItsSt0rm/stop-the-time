@@ -9,7 +9,7 @@ import 'support/sha256.dart';
 /// `flutter test` se ejecuta desde la raíz del proyecto.
 const _path = 'assets/audio/anchor.wav';
 const _expectedSha256 =
-    '8d3f63cdf38458fe38ff514dcc2241a3db0fb1e7fbc3bb8bf434fe2bf32c35a2';
+    '5a13e39ed101a5e1296fe74451e955b5ea79fee47251afa0d0219dc389b16914';
 const _expectedSize = 352844;
 
 String _tag(Uint8List b, int offset) =>

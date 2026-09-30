@@ -56,34 +56,32 @@ void main() {
       });
     }
 
-    test('inhale: sin pausas, monótona no decreciente, 1,6 s', () {
-      final p = AmplitudePatterns.inhale;
-      expect(p.amplitudes, everyElement(greaterThan(0)));
-      for (var i = 1; i < p.amplitudes.length; i++) {
-        expect(
-          p.amplitudes[i],
-          greaterThanOrEqualTo(p.amplitudes[i - 1]),
-          reason: 'índice $i: ${p.amplitudes}',
-        );
-      }
-      expect(p.amplitudes.last, greaterThan(p.amplitudes.first));
-      expect(p.duration, const Duration(milliseconds: 1600));
-      expect(p.duration, lessThan(const Duration(seconds: 4)));
-    });
+    int maxOf(List<int> xs) => xs.reduce((a, b) => a > b ? a : b);
 
-    test('exhale: sin pausas, monótona no creciente, 2,4 s', () {
-      final p = AmplitudePatterns.exhale;
-      expect(p.amplitudes, everyElement(greaterThan(0)));
-      for (var i = 1; i < p.amplitudes.length; i++) {
-        expect(
-          p.amplitudes[i],
-          lessThanOrEqualTo(p.amplitudes[i - 1]),
-          reason: 'índice $i: ${p.amplitudes}',
-        );
-      }
-      expect(p.amplitudes.last, lessThan(p.amplitudes.first));
-      expect(p.duration, const Duration(milliseconds: 2400));
-      expect(p.duration, lessThan(const Duration(seconds: 6)));
+    for (final MapEntry(key: name, value: p) in {
+      'inhale': AmplitudePatterns.inhale,
+      'exhale': AmplitudePatterns.exhale,
+    }.entries) {
+      test('$name: un único pulso sin pausas, de 40 a 150 ms', () {
+        expect(p.timings, hasLength(1));
+        expect(p.amplitudes, everyElement(greaterThan(0)));
+        expect(p.duration.inMilliseconds, inInclusiveRange(40, 150));
+      });
+
+      test('$name: misma intensidad que el máximo del ancla', () {
+        expect(p.amplitudes.single, maxOf(AmplitudePatterns.anchor.amplitudes));
+      });
+    }
+
+    test('inhale y exhale son idénticos (timings y amplitudes)', () {
+      expect(
+        AmplitudePatterns.inhale.timings,
+        AmplitudePatterns.exhale.timings,
+      );
+      expect(
+        AmplitudePatterns.inhale.amplitudes,
+        AmplitudePatterns.exhale.amplitudes,
+      );
     });
 
     test('anchor: contiene una pausa (amplitud 0) y cabe en la entrada', () {
@@ -120,6 +118,18 @@ void main() {
         for (var i = 1; i < p.timings.length; i += 2) {
           expect(p.timings[i], greaterThan(0), reason: 'índice $i');
         }
+      });
+    }
+
+    for (final MapEntry(key: name, value: p) in {
+      'inhale': OnOffPatterns.inhale,
+      'exhale': OnOffPatterns.exhale,
+    }.entries) {
+      test('$name on/off: primer timing 0 y un único tramo encendido', () {
+        expect(p.timings.first, 0);
+        expect(p.amplitudes.where((a) => a > 0), hasLength(1));
+        expect(p.timings, hasLength(2));
+        expect(p.timings[1], greaterThan(0));
       });
     }
 

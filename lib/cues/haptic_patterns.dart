@@ -46,17 +46,17 @@ abstract final class AmplitudePatterns {
     _swell(50, 10, steps: 3, stepMs: 70),
   ]);
 
-  /// Inhalación: la intensidad crece despacio durante 1,6 s, como el círculo.
-  static final inhale = _swell(15, 90, steps: 16);
-
-  /// Exhalación: la intensidad baja despacio durante 2,4 s.
-  static final exhale = _swell(80, 10, steps: 24);
+  /// Respiración: un pulso simple y definido en cada extremo del círculo (mínimo → empieza a
+  /// inhalar; máximo → empieza a exhalar). Las rampas largas se sentían anticlimáticas tras el
+  /// ancla. Misma intensidad máxima que el ancla para que se perciba igual de claro.
+  static final inhale = HapticPattern([70], [110]);
+  static final exhale = HapticPattern([70], [110]);
 }
 
 /// Sin control de intensidad el plugin llama a `createWaveform(timings, repeat)`, que alterna
 /// apagado/encendido empezando por apagado: por eso todos empiezan con 0 ms de espera.
 abstract final class OnOffPatterns {
   static final anchor = HapticPattern([0, 180, 350, 80], [0, 255, 0, 255]);
-  static final inhale = HapticPattern([0, 220], [0, 255]);
-  static final exhale = HapticPattern([0, 90, 160, 90], [0, 255, 0, 255]);
+  static final inhale = HapticPattern([0, 70], [0, 255]);
+  static final exhale = HapticPattern([0, 70], [0, 255]);
 }
