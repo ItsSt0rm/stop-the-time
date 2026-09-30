@@ -8,21 +8,53 @@ Duration _s(num s) => Duration(microseconds: (s * 1000000).round());
 void main() {
   const seq = defaultSequence;
 
-  group('grounding', () {
-    test('dos frases de 5 s: primero el tacto, luego un sonido; mismo verbo que el escaneo', () {
-      final grounding = seq.steps.firstWhere(
-        (s) => s.kind == StepKind.grounding,
-      );
-      expect(grounding.segments, hasLength(2));
-      expect(grounding.segments.map((s) => s.duration), everyElement(_s(5)));
-      expect(grounding.segments[0].text, contains('tocan'));
-      expect(grounding.segments[1].text, contains('sonido'));
-      for (final s in grounding.segments) {
-        expect(s.text, startsWith('Nota'));
-        expect(s.text!.toLowerCase(), isNot(contains('ves')));
+  group('escaneo, grounding y cierre', () {
+    SequenceStep stepOf(StepKind k) => seq.steps.firstWhere((s) => s.kind == k);
+
+    test('escaneo: dos frases de 7 s, mandíbula y luego hombros', () {
+      final escaneo = stepOf(StepKind.escaneo);
+      expect(escaneo.segments, hasLength(2));
+      expect(escaneo.segments.map((s) => s.duration), everyElement(_s(7)));
+      expect(escaneo.segments[0].text, 'Lleva la atención\na tu mandíbula.');
+      expect(escaneo.segments[1].text, 'Ahora, a tus hombros.');
+      expect(seq.positionAt(_ms(61999)).segmentIndex, 0);
+      expect(seq.positionAt(_s(62)).segmentIndex, 1);
+    });
+
+    test(
+      'grounding: dos frases de 6 s, primero el tacto y luego un sonido',
+      () {
+        final grounding = stepOf(StepKind.grounding);
+        expect(grounding.segments, hasLength(2));
+        expect(grounding.segments.map((s) => s.duration), everyElement(_s(6)));
+        expect(grounding.segments[0].text, startsWith('Siente'));
+        expect(grounding.segments[0].text, contains('tocan'));
+        expect(grounding.segments[1].text, startsWith('Escucha'));
+        expect(grounding.segments[1].text, contains('sonido'));
+        for (final s in grounding.segments) {
+          expect(s.text!.toLowerCase(), isNot(contains('ves')));
+        }
+        expect(seq.positionAt(_ms(74999)).segmentIndex, 0);
+        expect(seq.positionAt(_s(75)).segmentIndex, 1);
+      },
+    );
+
+    test('cierre: 5 s con frase y 4 s finales sin texto', () {
+      final cierre = stepOf(StepKind.cierre);
+      expect(cierre.segments, hasLength(2));
+      expect(cierre.segments[0].duration, _s(5));
+      expect(cierre.segments[0].text, 'Cuando quieras,\nsigue con tu día.');
+      expect(cierre.segments[1].duration, _s(4));
+      expect(cierre.segments[1].text, isNull);
+      expect(seq.positionAt(_ms(85999)).segmentIndex, 0);
+      expect(seq.positionAt(_s(86)).segmentIndex, 1);
+    });
+
+    test('el cierre no termina en pregunta', () {
+      for (final s in stepOf(StepKind.cierre).segments) {
+        final t = s.text ?? '';
+        expect(t.contains('¿') || t.contains('?'), isFalse, reason: t);
       }
-      expect(seq.positionAt(_s(79.999)).segmentIndex, 0);
-      expect(seq.positionAt(_s(80)).segmentIndex, 1);
     });
   });
 
@@ -46,7 +78,7 @@ void main() {
       final starts = [
         for (var i = 0; i < seq.steps.length; i++) seq.startOf(i).inSeconds,
       ];
-      expect(starts, [0, 5, 20, 55, 75, 85]);
+      expect(starts, [0, 5, 20, 55, 69, 81]);
       expect(seq.startOf(seq.steps.length), seq.total);
     });
 
@@ -55,9 +87,9 @@ void main() {
         5,
         15,
         35,
-        20,
-        10,
-        5,
+        14,
+        12,
+        9,
       ]);
     });
   });
@@ -71,8 +103,8 @@ void main() {
       expect(kindAt(_s(10)), StepKind.apoyo);
       expect(kindAt(_s(30)), StepKind.respiracion);
       expect(kindAt(_s(60)), StepKind.escaneo);
-      expect(kindAt(_s(80)), StepKind.grounding);
-      expect(kindAt(_s(87)), StepKind.cierre);
+      expect(kindAt(_s(75)), StepKind.grounding);
+      expect(kindAt(_s(85)), StepKind.cierre);
     });
 
     test('bordes entre pasos', () {
@@ -82,10 +114,10 @@ void main() {
       expect(kindAt(_s(20)), StepKind.respiracion);
       expect(kindAt(_ms(54999)), StepKind.respiracion);
       expect(kindAt(_s(55)), StepKind.escaneo);
-      expect(kindAt(_ms(74999)), StepKind.escaneo);
-      expect(kindAt(_s(75)), StepKind.grounding);
-      expect(kindAt(_ms(84999)), StepKind.grounding);
-      expect(kindAt(_s(85)), StepKind.cierre);
+      expect(kindAt(_ms(68999)), StepKind.escaneo);
+      expect(kindAt(_s(69)), StepKind.grounding);
+      expect(kindAt(_ms(80999)), StepKind.grounding);
+      expect(kindAt(_s(81)), StepKind.cierre);
     });
 
     test('no está terminada justo antes de 90 s', () {
@@ -191,6 +223,18 @@ void main() {
       }
     });
 
+    test('ninguna frase empieza por "Nota" (sin repetir el verbo)', () {
+      for (final t in texts) {
+        expect(t.trimLeft().startsWith('Nota'), isFalse, reason: t);
+      }
+    });
+
+    test('ningún texto menciona el abdomen', () {
+      for (final t in texts) {
+        expect(t.toLowerCase().contains('abdomen'), isFalse, reason: t);
+      }
+    });
+
     test('ningún texto contiene dígitos (sin cuentas atrás)', () {
       for (final t in texts) {
         expect(RegExp(r'\d').hasMatch(t), isFalse, reason: t);
@@ -202,10 +246,10 @@ void main() {
     double scaleAt(Duration d) => circleScaleAt(seq.positionAt(d));
 
     test('reposo fuera de la entrada y la respiración', () {
-      for (final s in [5, 10, 19, 22, 24, 56, 70, 80, 88]) {
+      // Excluye el tramo final del cierre (86–90 s), que vuelve al botón.
+      for (final s in [5, 10, 19, 22, 24, 56, 62, 70, 80, 82, 85.999]) {
         expect(scaleAt(_s(s)), restScale, reason: '$s s');
       }
-      expect(scaleAt(_s(90)), restScale);
     });
 
     test('inhalación: de reposo a máximo, monótona creciente', () {
@@ -242,7 +286,8 @@ void main() {
     });
 
     test('tras la entrada la escala siempre está entre reposo y máximo', () {
-      for (var ms = 5000; ms <= 90000; ms += 250) {
+      // Hasta 86 s: después el círculo crece al tamaño del botón.
+      for (var ms = 5000; ms <= 86000; ms += 250) {
         final v = scaleAt(_ms(ms));
         expect(v, inInclusiveRange(restScale, fullScale), reason: '$ms ms');
       }
@@ -315,8 +360,8 @@ void main() {
       }
     });
 
-    test('0 fuera de la entrada', () {
-      for (final s in [5, 10, 30, 60, 80, 88, 90, 100]) {
+    test('0 fuera de la entrada y del tramo final del cierre', () {
+      for (final s in [5, 10, 30, 60, 70, 80, 83, 85.999]) {
         expect(opacityAt(_s(s)), 0.0, reason: '$s s');
       }
     });
@@ -324,6 +369,45 @@ void main() {
     test('siempre en [0, 1]', () {
       for (var ms = -1000; ms <= 91000; ms += 100) {
         expect(opacityAt(_ms(ms)), inInclusiveRange(0.0, 1.0));
+      }
+    });
+  });
+
+  group('tramo final del cierre: el círculo vuelve a ser el botón', () {
+    double scaleAt(Duration d) => circleScaleAt(seq.positionAt(d));
+    double opacityAt(Duration d) => startLabelOpacityAt(seq.positionAt(d));
+
+    test('escala: 86 s ≈ reposo, 90 s ≈ botón', () {
+      expect(scaleAt(_s(86)), closeTo(restScale, 1e-6));
+      expect(scaleAt(_ms(89999)), closeTo(homeScale, 1e-3));
+      expect(scaleAt(_s(90)), closeTo(homeScale, 1e-9));
+      expect(scaleAt(_s(100)), closeTo(homeScale, 1e-9));
+    });
+
+    test('escala monótona creciente entre 86 y 90 s', () {
+      var prev = scaleAt(_s(86));
+      for (var ms = 86050; ms <= 90000; ms += 50) {
+        final v = scaleAt(_ms(ms));
+        expect(v, greaterThanOrEqualTo(prev), reason: '$ms ms');
+        prev = v;
+      }
+    });
+
+    test('"Para": 0 hasta 89 s y 1 a los 90 s', () {
+      for (var ms = 81000; ms <= 89000; ms += 50) {
+        expect(opacityAt(_ms(ms)), 0.0, reason: '$ms ms');
+      }
+      expect(opacityAt(_ms(89500)), closeTo(0.5, 1e-6));
+      expect(opacityAt(_s(90)), 1.0);
+      expect(opacityAt(_s(95)), 1.0);
+    });
+
+    test('"Para" reaparece de forma creciente en el último segundo', () {
+      var prev = opacityAt(_s(89));
+      for (var ms = 89050; ms <= 90000; ms += 50) {
+        final v = opacityAt(_ms(ms));
+        expect(v, greaterThanOrEqualTo(prev), reason: '$ms ms');
+        prev = v;
       }
     });
   });

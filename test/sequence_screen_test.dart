@@ -179,6 +179,43 @@ void main() {
     }
   });
 
+  testWidgets('al final el círculo vuelve a ser el botón y reaparece "Para"', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const ParaElTiempoApp());
+    final button = tester.getRect(find.byKey(HomeScreen.startButtonKey));
+    await tester.tap(find.byKey(HomeScreen.startButtonKey));
+    await tester.pump();
+    await tester.pump();
+    expect(find.byType(SequenceScreen), findsOneWidget);
+
+    await _advance(tester, const Duration(milliseconds: 89900));
+    expect(find.byType(SequenceScreen), findsOneWidget);
+    final circle = tester.getRect(find.byKey(SequenceScreen.circleKey));
+    expect(circle.center.dx, closeTo(button.center.dx, 1));
+    expect(circle.center.dy, closeTo(button.center.dy, 1));
+    expect(circle.width, closeTo(button.width, 1));
+    expect(circle.height, closeTo(button.height, 1));
+
+    final label = find.descendant(
+      of: find.byType(SequenceScreen),
+      matching: find.text('Para'),
+    );
+    expect(label, findsOneWidget);
+    final opacity = tester
+        .widget<Opacity>(
+          find.ancestor(of: label, matching: find.byType(Opacity)).first,
+        )
+        .opacity;
+    expect(opacity, greaterThan(0.5));
+
+    // Fin (90 s) + fundido de vuelta (600 ms) con margen.
+    await _advance(tester, const Duration(seconds: 3));
+    expect(find.byType(SequenceScreen), findsNothing);
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.text('Para'), findsOneWidget);
+  });
+
   testWidgets('tras 90 s la pantalla se cierra y vuelve al inicio', (
     tester,
   ) async {

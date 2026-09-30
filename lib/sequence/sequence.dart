@@ -128,27 +128,21 @@ const defaultSequence = Sequence([
     _inhale,
     _exhale,
   ]),
-  // 55–75 s: una zona cada 5 s, sin corregir.
+  // 55–69 s: dos zonas, solo llevar la atención (sin corregir). Verbos variados.
   SequenceStep(StepKind.escaneo, [
-    Segment(
-      Duration(seconds: 5),
-      text: 'Nota tu mandíbula.\nSin cambiar nada.',
-    ),
-    Segment(Duration(seconds: 5), text: 'Nota tus hombros,\ntal como están.'),
-    Segment(Duration(seconds: 5), text: 'Nota tus manos.'),
-    Segment(Duration(seconds: 5), text: 'Nota tu abdomen.'),
+    Segment(Duration(seconds: 7), text: 'Lleva la atención\na tu mandíbula.'),
+    Segment(Duration(seconds: 7), text: 'Ahora, a tus hombros.'),
   ]),
-  // 75–85 s: continúa el escaneo hacia fuera (cuerpo → contacto → entorno), mismo verbo.
+  // 69–81 s: del cuerpo hacia fuera: contacto → entorno.
   // Sin "algo que ves": obligaría a apartar la vista de la pantalla mientras se lee.
   SequenceStep(StepKind.grounding, [
-    Segment(Duration(seconds: 5), text: 'Nota lo que tocan tus manos.'),
-    Segment(Duration(seconds: 5), text: 'Nota un sonido a tu alrededor.'),
+    Segment(Duration(seconds: 6), text: 'Siente lo que tocan tus manos.'),
+    Segment(Duration(seconds: 6), text: 'Escucha un sonido\na tu alrededor.'),
   ]),
-  // 85–90 s
+  // 81–90 s: afirmación con permiso; después, sin texto, el círculo vuelve a ser el botón
+  // (simétrico a la entrada) y la secuencia termina.
   SequenceStep(StepKind.cierre, [
-    Segment(
-      Duration(seconds: 5),
-      text: 'Reanuda con una intención:\n¿qué haces ahora?',
-    ),
+    Segment(Duration(seconds: 5), text: 'Cuando quieras,\nsigue con tu día.'),
+    Segment(Duration(seconds: 4)),
   ]),
 ]);

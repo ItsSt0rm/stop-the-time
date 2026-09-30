@@ -23,6 +23,7 @@ const _curve = Curves.easeInOutSine;
 /// Escala del círculo para una posición de la secuencia.
 /// - Entrada: se contrae desde el botón hasta un punto y se expande al reposo.
 /// - Respiración: crece al inhalar, se encoge al exhalar.
+/// - Cierre (tramo final sin texto): crece del reposo al tamaño del botón.
 /// - Resto: reposo.
 double circleScaleAt(SequencePosition position) {
   if (position.step.kind == StepKind.entrada) {
@@ -30,6 +31,13 @@ double circleScaleAt(SequencePosition position) {
     return p < 0.5
         ? lerpDouble(homeScale, dotScale, _curve.transform(p * 2))!
         : lerpDouble(dotScale, restScale, _curve.transform((p - 0.5) * 2))!;
+  }
+  if (_isFinalReturn(position)) {
+    return lerpDouble(
+      restScale,
+      homeScale,
+      _curve.transform(position.segmentProgress),
+    )!;
   }
   final t = _curve.transform(position.segmentProgress);
   return switch (position.segment.breath) {
@@ -39,8 +47,19 @@ double circleScaleAt(SequencePosition position) {
   };
 }
 
-/// Opacidad de la palabra "Para" dentro del círculo: se desvanece en el primer segundo y cuarto.
+/// Opacidad de la palabra "Para" dentro del círculo: se desvanece al inicio de la entrada y
+/// reaparece en el último cuarto del cierre, cuando el círculo ya es otra vez el botón.
 double startLabelOpacityAt(SequencePosition position) {
-  if (position.step.kind != StepKind.entrada) return 0;
-  return (1 - position.segmentProgress / 0.25).clamp(0.0, 1.0);
+  final p = position.segmentProgress;
+  if (position.step.kind == StepKind.entrada) {
+    return (1 - p / 0.25).clamp(0.0, 1.0);
+  }
+  if (_isFinalReturn(position)) return ((p - 0.75) / 0.25).clamp(0.0, 1.0);
+  return 0;
 }
+
+/// Último tramo del cierre (sin texto): el círculo vuelve a ser el botón de inicio.
+bool _isFinalReturn(SequencePosition position) =>
+    position.step.kind == StepKind.cierre &&
+    position.segmentIndex == position.step.segments.length - 1 &&
+    position.segment.text == null;

@@ -18,12 +18,18 @@ inicia una secuencia guiada de ~90 s orientada a modificar el tiempo percibido y
 ## Secuencia
 | Tramo | Paso | Contenido |
 |---|---|---|
-| 0–5 s | Entrada | Pantalla oscura + vibración y sonido siempre idénticos (ancla) |
+| 0–5 s | Entrada | El círculo del botón se contrae a un punto y se expande al reposo + ancla (vibración y sonido siempre idénticos). Nunca pantalla vacía. |
 | 5–20 s | Apoyo | "Siente el peso de tu cuerpo y la presión de tus pies en el suelo." |
-| 20–55 s | Respiración | Inhala 4 s / exhala 6 s, 3–4 ciclos, pulso háptico lento + círculo |
-| 55–75 s | Escaneo | Una frase por zona: mandíbula, hombros, manos, abdomen. Solo notar. |
-| 75–85 s | Grounding | "Nombra un sonido, algo que ves y algo que tocas." |
-| 85–90 s | Cierre | "Reanuda con una intención: ¿qué haces ahora?" |
+| 20–55 s | Respiración | 5 s "Sigue el círculo…" + 3 ciclos inhala 4 s / exhala 6 s, pulso háptico lento + círculo |
+| 55–69 s | Escaneo | "Lleva la atención a tu mandíbula." / "Ahora, a tus hombros." (7 s c/u). Sin corregir. |
+| 69–81 s | Grounding | "Siente lo que tocan tus manos." / "Escucha un sonido a tu alrededor." (6 s c/u) |
+| 81–90 s | Cierre | "Cuando quieras, sigue con tu día." (5 s) + 4 s sin texto: el círculo vuelve a ser el botón |
+
+Decisiones de diseño (validadas por la persona usuaria en el teléfono):
+- Verbos variados; no repetir "Nota". Sin abdomen. Sin "algo que ves" (obliga a dejar de mirar la pantalla).
+- El cierre es una afirmación, no una pregunta (la pregunta 1–5 viene después).
+- Reposo del círculo pequeño (0.4) para que la inhalación se vea completa.
+- Salir de la app a mitad de la secuencia y volver puede reiniciarla: aceptado.
 
 La secuencia es diseño propio, no un protocolo validado. La definición vive en datos (una lista de pasos),
 no dispersa en widgets, para poder testear la temporización.
