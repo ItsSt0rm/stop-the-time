@@ -183,8 +183,8 @@ void main() {
   group('circleScaleAt', () {
     double scaleAt(Duration d) => circleScaleAt(seq.positionAt(d));
 
-    test('reposo fuera de la respiración', () {
-      for (final s in [0, 3, 10, 19, 22, 24, 56, 70, 80, 88]) {
+    test('reposo fuera de la entrada y la respiración', () {
+      for (final s in [5, 10, 19, 22, 24, 56, 70, 80, 88]) {
         expect(scaleAt(_s(s)), restScale, reason: '$s s');
       }
       expect(scaleAt(_s(90)), restScale);
@@ -223,10 +223,89 @@ void main() {
       }
     });
 
-    test('la escala siempre está entre reposo y máximo', () {
-      for (var ms = 0; ms <= 90000; ms += 250) {
+    test('tras la entrada la escala siempre está entre reposo y máximo', () {
+      for (var ms = 5000; ms <= 90000; ms += 250) {
         final v = scaleAt(_ms(ms));
         expect(v, inInclusiveRange(restScale, fullScale), reason: '$ms ms');
+      }
+    });
+  });
+
+  group('entrada: el círculo del botón se contrae y se expande', () {
+    double scaleAt(Duration d) => circleScaleAt(seq.positionAt(d));
+
+    test('constantes coherentes con el botón de inicio', () {
+      expect(circleBoxSize * homeScale, closeTo(200, 1e-9));
+      expect(dotScale, greaterThan(0));
+      expect(dotScale, lessThan(restScale));
+    });
+
+    test('t=0 ≈ botón, 2.5 s ≈ punto, 5 s ≈ reposo', () {
+      expect(scaleAt(Duration.zero), closeTo(homeScale, 1e-6));
+      expect(scaleAt(_ms(2500)), closeTo(dotScale, 1e-6));
+      expect(scaleAt(_ms(4999)), closeTo(restScale, 1e-3));
+      expect(scaleAt(_s(5)), closeTo(restScale, 1e-9));
+    });
+
+    test('el punto de 2.5 s es el mínimo de la entrada', () {
+      for (var ms = 0; ms < 5000; ms += 50) {
+        expect(scaleAt(_ms(ms)), greaterThanOrEqualTo(dotScale - 1e-9));
+      }
+    });
+
+    test('decrece en 0–2.5 s y crece en 2.5–5 s', () {
+      var prev = scaleAt(Duration.zero);
+      for (var ms = 50; ms <= 2500; ms += 50) {
+        final v = scaleAt(_ms(ms));
+        expect(v, lessThanOrEqualTo(prev), reason: '$ms ms');
+        prev = v;
+      }
+      for (var ms = 2550; ms <= 5000; ms += 50) {
+        final v = scaleAt(_ms(ms));
+        expect(v, greaterThanOrEqualTo(prev), reason: '$ms ms');
+        prev = v;
+      }
+    });
+
+    test('nunca llega a 0 ni es negativa', () {
+      for (var ms = -1000; ms <= 91000; ms += 10) {
+        expect(scaleAt(_ms(ms)), greaterThan(0), reason: '$ms ms');
+      }
+    });
+  });
+
+  group('startLabelOpacityAt', () {
+    double opacityAt(Duration d) => startLabelOpacityAt(seq.positionAt(d));
+
+    test('visible del todo en t=0', () {
+      expect(opacityAt(Duration.zero), 1.0);
+    });
+
+    test('se desvanece de forma continua hasta 1.25 s', () {
+      expect(opacityAt(_ms(625)), closeTo(0.5, 1e-6));
+      var prev = opacityAt(Duration.zero);
+      for (var ms = 50; ms <= 1250; ms += 50) {
+        final v = opacityAt(_ms(ms));
+        expect(v, lessThanOrEqualTo(prev), reason: '$ms ms');
+        prev = v;
+      }
+    });
+
+    test('0 desde 1.25 s hasta el final de la entrada', () {
+      for (var ms = 1250; ms < 5000; ms += 50) {
+        expect(opacityAt(_ms(ms)), 0.0, reason: '$ms ms');
+      }
+    });
+
+    test('0 fuera de la entrada', () {
+      for (final s in [5, 10, 30, 60, 80, 88, 90, 100]) {
+        expect(opacityAt(_s(s)), 0.0, reason: '$s s');
+      }
+    });
+
+    test('siempre en [0, 1]', () {
+      for (var ms = -1000; ms <= 91000; ms += 100) {
+        expect(opacityAt(_ms(ms)), inInclusiveRange(0.0, 1.0));
       }
     });
   });

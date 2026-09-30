@@ -60,36 +60,32 @@ class SequenceScreenState extends State<SequenceScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            AnimatedBuilder(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: AnimatedBuilder(
               animation: _clock,
-              builder: (context, _) {
-                final position = _sequence.positionAt(_elapsed);
-                final isEntrada = position.step.kind == StepKind.entrada;
-                return AnimatedOpacity(
-                  // Único oscurecido total: la entrada (0–5 s).
-                  opacity: isEntrada ? 0 : 1,
-                  duration: const Duration(milliseconds: 1500),
-                  child: _SequenceBody(position: position),
-                );
-              },
+              builder: (context, _) =>
+                  _SequenceBody(position: _sequence.positionAt(_elapsed)),
             ),
-            Positioned(
-              right: 8,
-              top: 8,
-              child: TextButton(
-                key: SequenceScreen.exitButtonKey,
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text(
-                  'Salir',
-                  style: TextStyle(color: AppColors.textDim),
+          ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: TextButton(
+                  key: SequenceScreen.exitButtonKey,
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text(
+                    'Salir',
+                    style: TextStyle(color: AppColors.textDim),
+                  ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -103,31 +99,41 @@ class _SequenceBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = position.segment.text;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+    // El círculo queda centrado en pantalla, igual que el botón de inicio,
+    // para que la entrada continúe el mismo círculo sin saltos.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final textTop = constraints.maxHeight / 2 + circleBoxSize / 2 + 32;
+        return Stack(
           children: [
-            SizedBox.square(
-              dimension: 240,
-              child: Center(
-                child: Transform.scale(
-                  scale: circleScaleAt(position),
-                  child: Container(
-                    key: SequenceScreen.circleKey,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.circle,
-                      border: Border.all(color: AppColors.circleEdge),
+            Center(
+              child: SizedBox.square(
+                dimension: circleBoxSize,
+                child: Center(
+                  child: Transform.scale(
+                    scale: circleScaleAt(position),
+                    child: Container(
+                      key: SequenceScreen.circleKey,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.circle,
+                        border: Border.all(color: AppColors.circleEdge),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 48),
-            SizedBox(
-              height: 110,
+            Center(
+              child: Opacity(
+                opacity: startLabelOpacityAt(position),
+                child: const Text('Para', style: startLabelStyle),
+              ),
+            ),
+            Positioned(
+              top: textTop,
+              left: 32,
+              right: 32,
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 900),
                 child: Text(
@@ -146,8 +152,8 @@ class _SequenceBody extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
+        );
+      },
     );
   }
 }

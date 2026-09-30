@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:para_el_tiempo/main.dart';
 import 'package:para_el_tiempo/screens/home_screen.dart';
 import 'package:para_el_tiempo/screens/sequence_screen.dart';
+import 'package:para_el_tiempo/sequence/breathing.dart';
 import 'package:para_el_tiempo/sequence/sequence.dart';
 
 String _textOf(StepKind kind, [int segment = 0]) => defaultSequence.steps
@@ -45,6 +46,9 @@ Future<void> _advance(
 /// Tiempo tras un cambio de frase para que acabe el fundido (900 ms).
 const _afterSwitch = Duration(seconds: 2);
 
+/// Tiempo tras un pop para que acabe el fundido de vuelta (600 ms) con margen.
+const _afterExit = Duration(seconds: 2);
+
 double _circleWidth(WidgetTester tester) =>
     tester.getRect(find.byKey(SequenceScreen.circleKey)).width;
 
@@ -66,10 +70,10 @@ void main() {
 
   testWidgets('durante la inhalación el círculo crece', (tester) async {
     await _pumpSequence(tester);
-    // En reposo (apoyo) el círculo está a restScale de su caja de 240.
+    // En reposo (apoyo) el círculo está a restScale de su caja.
     await _advance(tester, const Duration(seconds: 10));
     final rest = _circleWidth(tester);
-    expect(rest, closeTo(240 * 0.6, 0.5));
+    expect(rest, closeTo(circleBoxSize * restScale, 0.5));
 
     // Primera inhalación: 25–29 s.
     await _advance(tester, const Duration(milliseconds: 15500)); // 25.5 s
@@ -86,6 +90,76 @@ void main() {
     await _advance(tester, const Duration(seconds: 4)); // 34.5 s
     expect(find.text('Exhala'), findsOneWidget);
     expect(_circleWidth(tester), lessThan(exhaleEarly));
+  });
+
+  testWidgets('continuidad: el círculo arranca donde estaba el botón', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const ParaElTiempoApp());
+    final button = tester.getRect(find.byKey(HomeScreen.startButtonKey));
+
+    await tester.tap(find.byKey(HomeScreen.startButtonKey));
+    // Primer frame en el que el círculo es encontrable (onstage).
+    var pumps = 0;
+    do {
+      await tester.pump();
+      pumps++;
+    } while (find.byKey(SequenceScreen.circleKey).evaluate().isEmpty &&
+        pumps < 3);
+    final circle = tester.getRect(find.byKey(SequenceScreen.circleKey));
+
+    expect(circle.center.dx, closeTo(button.center.dx, 1));
+    expect(circle.center.dy, closeTo(button.center.dy, 1));
+    expect(circle.width, closeTo(button.width, 1));
+    expect(circle.height, closeTo(button.height, 1));
+  });
+
+  testWidgets('"Para" visible en t=0 y desvanecido a los 2 s', (tester) async {
+    await _pumpSequence(tester);
+    final label = find.descendant(
+      of: find.byType(SequenceScreen),
+      matching: find.text('Para'),
+    );
+    double labelOpacity() => tester
+        .widget<Opacity>(
+          find.ancestor(of: label, matching: find.byType(Opacity)).first,
+        )
+        .opacity;
+
+    expect(label, findsOneWidget);
+    expect(labelOpacity(), closeTo(1, 1e-6));
+    await _advance(tester, const Duration(seconds: 2));
+    expect(labelOpacity(), 0);
+  });
+
+  testWidgets('durante la entrada el círculo es visible', (tester) async {
+    await _openFromHome(tester);
+    final circle = find.byKey(SequenceScreen.circleKey);
+    // Instantes: inicio, contracción, punto mínimo, expansión, final.
+    const checkpoints = [0, 1000, 2500, 3500, 4900];
+    var now = 0;
+    for (final ms in checkpoints) {
+      await _advance(tester, Duration(milliseconds: ms - now));
+      now = ms;
+      expect(circle, findsOneWidget, reason: '$ms ms');
+      expect(tester.getRect(circle).width, greaterThan(0), reason: '$ms ms');
+      for (final w in tester.widgetList(
+        find.ancestor(
+          of: circle,
+          matching: find.byWidgetPredicate((_) => true),
+        ),
+      )) {
+        final hidden = switch (w) {
+          Opacity(:final opacity) => opacity == 0,
+          AnimatedOpacity(:final opacity) => opacity == 0,
+          FadeTransition(:final opacity) => opacity.value == 0,
+          Visibility(:final visible) => !visible,
+          Offstage(:final offstage) => offstage,
+          _ => false,
+        };
+        expect(hidden, isFalse, reason: '$ms ms: ${w.runtimeType} lo oculta');
+      }
+    }
   });
 
   testWidgets('tras 90 s la pantalla se cierra y vuelve al inicio', (
@@ -109,7 +183,7 @@ void main() {
     await _advance(tester, const Duration(seconds: 30));
 
     await tester.tap(find.byKey(SequenceScreen.exitButtonKey));
-    await _advance(tester, const Duration(seconds: 1));
+    await _advance(tester, _afterExit);
     expect(find.byType(SequenceScreen), findsNothing);
     expect(find.byType(HomeScreen), findsOneWidget);
 
@@ -118,13 +192,11 @@ void main() {
     expect(find.byType(HomeScreen), findsOneWidget);
   });
 
-  testWidgets('"Salir" funciona también durante la entrada oscura', (
-    tester,
-  ) async {
+  testWidgets('"Salir" funciona también durante la entrada', (tester) async {
     await _openFromHome(tester);
     await _advance(tester, const Duration(seconds: 2));
     await tester.tap(find.byKey(SequenceScreen.exitButtonKey));
-    await _advance(tester, const Duration(seconds: 1));
+    await _advance(tester, _afterExit);
     expect(find.byType(SequenceScreen), findsNothing);
     expect(find.byType(HomeScreen), findsOneWidget);
   });
@@ -140,7 +212,7 @@ void main() {
       find.byKey(SequenceScreen.exitButtonKey),
       warnIfMissed: false,
     );
-    await _advance(tester, const Duration(seconds: 1));
+    await _advance(tester, _afterExit);
     expect(find.byType(HomeScreen), findsOneWidget);
   });
 
@@ -191,7 +263,7 @@ void main() {
     expect(find.byType(SequenceScreen), findsOneWidget);
 
     state.skipStep();
-    await _advance(tester, const Duration(seconds: 1));
+    await _advance(tester, _afterExit);
     expect(find.byType(SequenceScreen), findsNothing);
     expect(find.byType(HomeScreen), findsOneWidget);
   });

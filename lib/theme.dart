@@ -9,6 +9,14 @@ abstract final class AppColors {
   static const textDim = Color(0xFF5E656D);
 }
 
+/// Texto "Para" del botón; se reutiliza en la entrada de la secuencia para que no cambie de aspecto.
+const startLabelStyle = TextStyle(
+  fontSize: 26,
+  letterSpacing: 2,
+  fontWeight: FontWeight.w300,
+  color: AppColors.text,
+);
+
 ThemeData buildTheme() {
   final base = ThemeData.dark(useMaterial3: true);
   return base.copyWith(

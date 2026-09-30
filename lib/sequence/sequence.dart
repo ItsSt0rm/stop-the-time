@@ -104,7 +104,8 @@ const _exhale = Segment(
 
 /// Secuencia de ~90 s. Diseño propio, no un protocolo validado.
 const defaultSequence = Sequence([
-  // 0–5 s: pantalla oscura; el ancla (vibración + sonido) se añade en la fase 3.
+  // 0–5 s: el círculo del botón se contrae hasta un punto y se expande al reposo
+  // (ver circleScaleAt). El ancla (vibración + sonido) se añade en la fase 3.
   SequenceStep(StepKind.entrada, [Segment(Duration(seconds: 5))]),
   // 5–20 s
   SequenceStep(StepKind.apoyo, [

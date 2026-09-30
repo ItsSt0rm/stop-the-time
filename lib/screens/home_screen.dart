@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../sequence/breathing.dart';
 import '../theme.dart';
 import 'sequence_screen.dart';
 
@@ -21,28 +22,24 @@ class HomeScreen extends StatelessWidget {
             onTap: () => Navigator.of(context).push(
               PageRouteBuilder<void>(
                 pageBuilder: (_, _, _) => const SequenceScreen(),
+                // Entrada instantánea: la secuencia empieza con este mismo círculo en el mismo
+                // lugar, así que no hay corte visible. Al volver, fundido suave.
+                transitionDuration: Duration.zero,
+                reverseTransitionDuration: const Duration(milliseconds: 600),
                 transitionsBuilder: (_, animation, _, child) =>
                     FadeTransition(opacity: animation, child: child),
-                transitionDuration: const Duration(milliseconds: 600),
               ),
             ),
             child: Container(
-              width: 200,
-              height: 200,
+              width: circleBoxSize * homeScale,
+              height: circleBoxSize * homeScale,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.circle,
                 border: Border.all(color: AppColors.circleEdge),
               ),
-              child: const Text(
-                'Para',
-                style: TextStyle(
-                  fontSize: 26,
-                  letterSpacing: 2,
-                  fontWeight: FontWeight.w300,
-                ),
-              ),
+              child: const Text('Para', style: startLabelStyle),
             ),
           ),
         ),
