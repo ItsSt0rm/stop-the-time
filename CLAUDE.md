@@ -39,7 +39,12 @@ no dispersa en widgets, para poder testear la temporización.
 - Paquetes: `vibration` (patrones + intensidades), `wakelock_plus` (pantalla encendida, sin permisos),
   `audioplayers` (audio local), `shared_preferences` (dato local). Añadir otro paquete requiere justificarlo
   y pasar por el subagente `security-reviewer`.
-- `pubspec.lock` se versiona. Nada de rangos abiertos tipo `any`.
+- `pubspec.lock` se versiona. Nada de rangos abiertos tipo `any`. Revisar el diff del lock en cada `pub upgrade`.
+- `vibration` NO tiene publisher verificado en pub.dev (mantenedor individual): versión fijada por el lock,
+  código Android revisado (usa `createWaveform` con `USAGE_ALARM`). Revisar su diff antes de actualizarlo.
+- Audio: solo `AssetSource` (nunca `UrlSource`/`setSourceUrl`). El ancla se genera con
+  `scripts/generate_anchor_sound.py` (determinista; su sha256 lo fija `test/anchor_asset_test.dart`).
+- Vibración y sonido pasan por la interfaz `SensoryCues`; los tests usan `FakeCues` (test/flutter_test_config.dart).
 
 ## Entorno de compilación
 - Windows tiene **Smart App Control** activo y bloquea el Dart SDK de Windows. **No se desactiva.**

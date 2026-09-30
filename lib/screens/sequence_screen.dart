@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../cues/sensory_cues.dart';
 import '../sequence/breathing.dart';
 import '../sequence/sequence.dart';
 import '../theme.dart';
 
 /// Reproduce la secuencia guiada. Sin reloj, cuenta atrás ni barra de progreso.
 class SequenceScreen extends StatefulWidget {
-  const SequenceScreen({super.key, this.sequence = defaultSequence});
+  const SequenceScreen({super.key, this.sequence = defaultSequence, this.cues});
 
   final Sequence sequence;
+
+  /// Vibración y sonido; por defecto [SensoryCues.instance].
+  final SensoryCues? cues;
 
   static const exitButtonKey = Key('exit-button');
   static const circleKey = Key('breathing-circle');
@@ -20,6 +24,10 @@ class SequenceScreen extends StatefulWidget {
 class SequenceScreenState extends State<SequenceScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _clock;
+  late final SensoryCues _cues = widget.cues ?? SensoryCues.instance;
+
+  /// Último tramo en el que se emitió una señal, para emitir una sola vez por tramo.
+  (int, int)? _cuedSegment;
 
   Sequence get _sequence => widget.sequence;
 
@@ -30,16 +38,36 @@ class SequenceScreenState extends State<SequenceScreen>
     super.initState();
     // Un único reloj interno (nunca visible) marca toda la secuencia.
     _clock = AnimationController(vsync: this, duration: _sequence.total)
+      ..addListener(_emitCues)
       ..addStatusListener((status) {
         if (status == AnimationStatus.completed) _finish();
       })
       ..forward();
+    _cues.anchor();
   }
 
   @override
   void dispose() {
+    _cues.stop();
     _clock.dispose();
     super.dispose();
+  }
+
+  /// Pulso háptico al empezar cada inhalación y cada exhalación.
+  void _emitCues() {
+    final position = _sequence.positionAt(_elapsed);
+    if (position.finished) return;
+    final segment = (position.stepIndex, position.segmentIndex);
+    if (segment == _cuedSegment) return;
+    _cuedSegment = segment;
+    switch (position.segment.breath) {
+      case Breath.inhale:
+        _cues.inhale();
+      case Breath.exhale:
+        _cues.exhale();
+      case null:
+        break;
+    }
   }
 
   /// Salta al inicio del siguiente paso (el botón llega en la fase 4).
