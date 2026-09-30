@@ -1,0 +1,10 @@
+# Se compila en WSL (Linux): forzar finales de línea LF.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.png binary
+*.jpg binary
+*.wav binary
+*.ogg binary
+*.jar binary
+*.jks binary
+*.keystore binary
