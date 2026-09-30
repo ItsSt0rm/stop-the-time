@@ -53,6 +53,23 @@ double _circleWidth(WidgetTester tester) =>
     tester.getRect(find.byKey(SequenceScreen.circleKey)).width;
 
 void main() {
+  testWidgets(
+    'las frases no se desplazan en vertical durante el fundido (2 líneas → 1 línea)',
+    (tester) async {
+      await _pumpSequence(tester);
+      final prep = _textOf(StepKind.respiracion, 0); // 2 líneas
+      await _advance(tester, const Duration(seconds: 24));
+      final topBefore = tester.getTopLeft(find.text(prep)).dy;
+
+      // 25 s: entra "Inhala" (1 línea) mientras "Sigue el círculo…" se desvanece.
+      await _advance(tester, const Duration(milliseconds: 1400));
+      expect(find.text(prep), findsOneWidget);
+      expect(find.text('Inhala'), findsOneWidget);
+      expect(tester.getTopLeft(find.text(prep)).dy, topBefore);
+      expect(tester.getTopLeft(find.text('Inhala')).dy, topBefore);
+    },
+  );
+
   testWidgets('a los 10 s se ve el texto de apoyo', (tester) async {
     await _pumpSequence(tester);
     await _advance(tester, const Duration(seconds: 10));

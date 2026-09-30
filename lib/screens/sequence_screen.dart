@@ -136,6 +136,12 @@ class _SequenceBody extends StatelessWidget {
               right: 32,
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 900),
+                // Anclado arriba: durante el fundido conviven frases con distinto número de
+                // líneas; centradas (el valor por defecto) se desplazan en vertical.
+                layoutBuilder: (current, previous) => Stack(
+                  alignment: Alignment.topCenter,
+                  children: [...previous, ?current],
+                ),
                 child: Text(
                   text ?? '',
                   // La clave por tramo hace que cada frase entre con un fundido suave.
