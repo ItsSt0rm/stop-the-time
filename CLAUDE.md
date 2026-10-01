@@ -12,9 +12,18 @@ inicia una secuencia guiada de ~90 s orientada a modificar el tiempo percibido y
 - Pantalla encendida solo mientras corre la secuencia.
 - Se puede salir en cualquier momento ("Salir" o botón/gesto atrás). **No hay opción de omitir pasos**
   (decisión de la persona usuaria en la fase 4; sustituye al requisito original de "omitir").
-- Sin pregunta final ni datos guardados: la pregunta 1–5 del plan original se **descartó** (2026-09-30).
-  La app no persiste nada del usuario.
+- Sin pregunta final: la pregunta 1–5 del plan original se **descartó** (2026-09-30).
+- Lo **único** que la app guarda son los recordatorios (hora, días, activo), solo en el teléfono
+  (`SharedPreferencesAsync`, clave `reminders.v1`). Sin copia en la nube ni transferencia entre dispositivos:
+  `allowBackup="false"` (Android ≤11) + `res/xml/data_extraction_rules.xml` (Android 12+, también D2D).
+  Nada más del usuario.
+- Recordatorios tipo alarma (2026-10-01): hora + días de la semana + interruptor, en una pantalla a la que se
+  entra desde un ícono de campana **arriba a la derecha** del inicio. Al tocar la notificación se abre el
+  inicio (no arranca la secuencia sola). Texto: "Un momento para parar.". Hora **exacta** con
+  `SCHEDULE_EXACT_ALARM` (la persona lo concede en Ajustes); si no está concedido, se programa inexacto.
 - Sin cuentas, sin analítica, sin red. El APK de release **no** debe declarar `android.permission.INTERNET`.
+  Permisos esperados en release: `VIBRATE`, `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`,
+  `RECEIVE_BOOT_COMPLETED` (+ el interno de AndroidX). Cualquier otro debe justificarse.
 - Todos los recursos (audio, fuentes) van empaquetados; nada se descarga en tiempo de ejecución.
 
 ## Secuencia
@@ -39,8 +48,14 @@ no dispersa en widgets, para poder testear la temporización.
 ## Stack
 - Flutter (stable, fijado en `scripts/setup-wsl-toolchain.sh`), solo Android.
 - Paquetes: `vibration` (patrones + intensidades), `wakelock_plus` (pantalla encendida, sin permisos),
-  `audioplayers` (audio local). Añadir otro paquete requiere justificarlo
+  `audioplayers` (audio local), `flutter_local_notifications` + `timezone` (recordatorios),
+  `shared_preferences` (guardar recordatorios). Añadir otro paquete requiere justificarlo
   y pasar por el subagente `security-reviewer`.
+- `wakelock_plus` fijado en 1.8.0: 1.8.1 choca en `dbus` (solo Linux) con `flutter_local_notifications_linux`.
+- Zona horaria: canal propio `para_el_tiempo/timezone` en `MainActivity.kt` (sin `flutter_timezone`, que usa
+  el Kotlin Gradle Plugin que Flutter dejará de admitir).
+- Logo "anillo y punto": vectores en `res/drawable/ic_launcher_*.xml` + PNG de Android 7 generados por
+  `scripts/generate_launcher_png.py`; ícono de notificación `ic_stat_para` (protegido en `res/raw/keep.xml`).
 - `pubspec.lock` se versiona. Nada de rangos abiertos tipo `any`. Revisar el diff del lock en cada `pub upgrade`.
 - `vibration` NO tiene publisher verificado en pub.dev (mantenedor individual): versión fijada por el lock,
   código Android revisado (usa `createWaveform` con `USAGE_ALARM`). Revisar su diff antes de actualizarlo.

@@ -12,9 +12,11 @@ combinado de release), pide a quien te invocó la ruta del archivo generado.
 1. **Permisos Android**
    - `android/app/src/main/AndroidManifest.xml` y, si existe, el manifiesto combinado de release en
      `build/app/intermediates/merged_manifests/release/**/AndroidManifest.xml` (o rutas equivalentes bajo `build/app/intermediates`).
-   - Esperado: `VIBRATE` y nada más que no esté justificado. `INTERNET` **no** debe aparecer en release
-     (Flutter lo añade solo en los manifiestos `debug`/`profile`; verifica que siga así).
-   - `android:exported`, `allowBackup`, `usesCleartextTraffic`, `debuggable` en release.
+   - Esperado (ver CLAUDE.md): `VIBRATE`, `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`,
+     `RECEIVE_BOOT_COMPLETED` y el interno de AndroidX; nada más sin justificar. `INTERNET` **no** debe
+     aparecer en release (Flutter lo añade solo en los manifiestos `debug`/`profile`; verifica que siga así).
+   - `android:exported`, `allowBackup="false"` + `dataExtractionRules` (sin nube ni transferencia D2D),
+     `usesCleartextTraffic`, `debuggable` en release.
 2. **Dependencias**
    - `pubspec.yaml`: versiones con caret razonables, sin `any`, sin `git:`/`path:` inesperados.
    - `pubspec.lock` presente y versionado; fuentes solo `hosted` en `https://pub.dev`.
@@ -25,8 +27,8 @@ combinado de release), pide a quien te invocó la ruta del archivo generado.
    - Busca claves, tokens, contraseñas, `key.properties`, `*.jks`, `*.keystore`, `storePassword`, `keyPassword`
      en archivos versionables. Verifica que `.gitignore` los excluya.
 4. **Datos y privacidad**
-   - La app no persiste datos del usuario (no hay `shared_preferences` ni bases de datos); sin logs con
-     datos personales; sin llamadas de red
+   - Lo único persistido son los recordatorios (`SharedPreferencesAsync`, clave `reminders.v1`: hora, días,
+     activo); nada más del usuario. Sin logs con datos personales; sin llamadas de red
      (`http`, `HttpClient`, `Socket`, `url_launcher`, WebView).
 5. **Scripts** (`scripts/*.sh`): descargas solo HTTPS con verificación SHA256; nada de `curl | bash`; sin `sudo` oculto.
 

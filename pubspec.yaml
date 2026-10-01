@@ -10,13 +10,21 @@ dependencies:
   audioplayers: ^6.8.1
   flutter:
     sdk: flutter
+  flutter_local_notifications: ^22.3.1
+  flutter_localizations:
+    sdk: flutter
+  shared_preferences: ^2.5.5
+  timezone: ^0.11.1
   vibration: ^3.2.1
-  wakelock_plus: ^1.8.1
+  # 1.8.1 exige dbus ^0.8 y flutter_local_notifications 22 exige dbus ^0.7 (solo Linux).
+  # Volver a "^1.8.x" cuando flutter_local_notifications_linux acepte dbus 0.8.
+  wakelock_plus: 1.8.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  shared_preferences_platform_interface: ^2.4.2
 
 flutter:
   uses-material-design: true

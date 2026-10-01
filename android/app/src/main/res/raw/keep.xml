@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- El ícono de notificación solo se nombra desde Dart ('ic_stat_para'); sin esto, la reducción de
+     recursos del release podría eliminarlo y las notificaciones fallarían en silencio. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_stat_para" />
