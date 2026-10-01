@@ -3,6 +3,8 @@
 App Android personal: un botón que inicia una secuencia guiada de ~90 s para atender al presente.
 Sin cuentas, sin analítica, sin red. Uso propio; no es una herramienta médica ni terapéutica.
 
+**Descarga:** https://itsst0rm.github.io/stop-the-time/ (la página vive en `docs/`; el APK, en Releases).
+
 Reglas del proyecto y entorno: ver [CLAUDE.md](CLAUDE.md).
 
 ## Compilar (dentro de WSL2 Ubuntu)
