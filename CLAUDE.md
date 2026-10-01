@@ -64,6 +64,14 @@ no dispersa en widgets, para poder testear la temporización.
 - Keystore de release fuera del repo (`~/.keystores/` en WSL). `key.properties`, `*.jks`, `*.keystore` en `.gitignore`.
 - Nunca commitear secretos. Revisar el manifiesto combinado de release antes de entregar un APK.
 
+## Estado (2026-09-30)
+- Fases 0–4 terminadas y validadas en el A55 (último commit de la fase 4: "Fase 4: pantalla encendida…").
+- Fase 5 (pregunta 1–5) **no implementada**: la persona usuaria dio la funcionalidad por buena tras la fase 4.
+  Confirmar con ella si se descarta o se hace antes de cerrar el APK.
+- Siguiente: fase 6 (APK de release firmado con keystore propia fuera del repo; revisar permisos con
+  `aapt2 dump permissions`; hoy el release pide solo `VIBRATE`). El APK universal pesa ~45 MB:
+  valorar `--split-per-abi` o `--target-platform android-arm64` para el A55.
+
 ## Forma de trabajo
 - Fases pequeñas: (0) entorno, (1) base con botón, (2) secuencia + temporización, (3) háptica y audio,
   (4) pantalla encendida + salir, (5) pregunta final local, (6) APK instalable.
