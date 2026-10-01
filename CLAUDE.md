@@ -68,9 +68,16 @@ no dispersa en widgets, para poder testear la temporización.
 ## Estado (2026-09-30)
 - Fases 0–4 terminadas y validadas en el A55 (último commit de la fase 4: "Fase 4: pantalla encendida…").
 - Fase 5 (pregunta 1–5) **descartada** por la persona usuaria: la funcionalidad está completa.
-- Siguiente: fase 6 (APK de release firmado con keystore propia fuera del repo; revisar permisos con
-  `aapt2 dump permissions`; hoy el release pide solo `VIBRATE`). El APK universal pesa ~45 MB:
-  valorar `--split-per-abi` o `--target-platform android-arm64` para el A55.
+- Fase 6 hecha: repo público https://github.com/ItsSt0rm/stop-the-time (MIT), página de descarga en `docs/`
+  (GitHub Pages), APK en GitHub Releases como `para-el-tiempo.apk` + `SHA256SUMS` (el enlace
+  `releases/latest/download/para-el-tiempo.apk` de la página depende de ese nombre exacto).
+- `applicationId` = `io.github.itsst0rm.paraeltiempo`. Release solo arm64:
+  `flutter build apk --release --target-platform android-arm64`. Firma: `~/.keystores/para-el-tiempo.{jks,properties}`
+  (WSL), creada con `scripts/create-release-keystore.sh`; copia cifrada con gpg en OneDrive. Sin keystore el release falla.
+- Commits con el correo noreply de GitHub (configurado en el repo); nunca el correo personal.
+- Para una versión nueva: subir `version` en `pubspec.yaml` (el `+N` debe crecer), compilar, `aapt2 dump permissions`,
+  `security-reviewer`, y crear release con tag `vX.Y.Z`.
+- Desde Git Bash, llamar a WSL con `MSYS_NO_PATHCONV=1` o Git Bash reescribe las rutas `/mnt/...`.
 
 ## Forma de trabajo
 - Fases pequeñas: (0) entorno, (1) base con botón, (2) secuencia + temporización, (3) háptica y audio,
