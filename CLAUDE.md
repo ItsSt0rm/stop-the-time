@@ -12,7 +12,8 @@ inicia una secuencia guiada de ~90 s orientada a modificar el tiempo percibido y
 - Pantalla encendida solo mientras corre la secuencia.
 - Se puede salir en cualquier momento ("Salir" o botón/gesto atrás). **No hay opción de omitir pasos**
   (decisión de la persona usuaria en la fase 4; sustituye al requisito original de "omitir").
-- Pregunta final opcional 1–5 "¿Qué tan presente te sentiste?", guardada **solo en el dispositivo**.
+- Sin pregunta final ni datos guardados: la pregunta 1–5 del plan original se **descartó** (2026-09-30).
+  La app no persiste nada del usuario.
 - Sin cuentas, sin analítica, sin red. El APK de release **no** debe declarar `android.permission.INTERNET`.
 - Todos los recursos (audio, fuentes) van empaquetados; nada se descarga en tiempo de ejecución.
 
@@ -28,7 +29,7 @@ inicia una secuencia guiada de ~90 s orientada a modificar el tiempo percibido y
 
 Decisiones de diseño (validadas por la persona usuaria en el teléfono):
 - Verbos variados; no repetir "Nota". Sin abdomen. Sin "algo que ves" (obliga a dejar de mirar la pantalla).
-- El cierre es una afirmación, no una pregunta (la pregunta 1–5 viene después).
+- El cierre es una afirmación, no una pregunta.
 - Reposo del círculo pequeño (0.4) para que la inhalación se vea completa.
 - Salir de la app a mitad de la secuencia y volver puede reiniciarla: aceptado.
 
@@ -38,7 +39,7 @@ no dispersa en widgets, para poder testear la temporización.
 ## Stack
 - Flutter (stable, fijado en `scripts/setup-wsl-toolchain.sh`), solo Android.
 - Paquetes: `vibration` (patrones + intensidades), `wakelock_plus` (pantalla encendida, sin permisos),
-  `audioplayers` (audio local), `shared_preferences` (dato local). Añadir otro paquete requiere justificarlo
+  `audioplayers` (audio local). Añadir otro paquete requiere justificarlo
   y pasar por el subagente `security-reviewer`.
 - `pubspec.lock` se versiona. Nada de rangos abiertos tipo `any`. Revisar el diff del lock en cada `pub upgrade`.
 - `vibration` NO tiene publisher verificado en pub.dev (mantenedor individual): versión fijada por el lock,
@@ -66,15 +67,14 @@ no dispersa en widgets, para poder testear la temporización.
 
 ## Estado (2026-09-30)
 - Fases 0–4 terminadas y validadas en el A55 (último commit de la fase 4: "Fase 4: pantalla encendida…").
-- Fase 5 (pregunta 1–5) **no implementada**: la persona usuaria dio la funcionalidad por buena tras la fase 4.
-  Confirmar con ella si se descarta o se hace antes de cerrar el APK.
+- Fase 5 (pregunta 1–5) **descartada** por la persona usuaria: la funcionalidad está completa.
 - Siguiente: fase 6 (APK de release firmado con keystore propia fuera del repo; revisar permisos con
   `aapt2 dump permissions`; hoy el release pide solo `VIBRATE`). El APK universal pesa ~45 MB:
   valorar `--split-per-abi` o `--target-platform android-arm64` para el A55.
 
 ## Forma de trabajo
 - Fases pequeñas: (0) entorno, (1) base con botón, (2) secuencia + temporización, (3) háptica y audio,
-  (4) pantalla encendida + salir, (5) pregunta final local, (6) APK instalable.
+  (4) pantalla encendida + salir, (5) ~~pregunta final~~ descartada, (6) APK instalable.
 - Al terminar cada fase: explicar exactamente cómo probarla.
 - Si algo no se sabe, verificarlo en la documentación oficial; no inventar APIs.
 - Explicaciones breves de decisiones importantes (la persona usuaria viene de Power Platform/Python

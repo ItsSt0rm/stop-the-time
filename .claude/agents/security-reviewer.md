@@ -25,7 +25,8 @@ combinado de release), pide a quien te invocó la ruta del archivo generado.
    - Busca claves, tokens, contraseñas, `key.properties`, `*.jks`, `*.keystore`, `storePassword`, `keyPassword`
      en archivos versionables. Verifica que `.gitignore` los excluya.
 4. **Datos y privacidad**
-   - Solo `shared_preferences` para el dato 1–5; sin logs con datos personales; sin llamadas de red
+   - La app no persiste datos del usuario (no hay `shared_preferences` ni bases de datos); sin logs con
+     datos personales; sin llamadas de red
      (`http`, `HttpClient`, `Socket`, `url_launcher`, WebView).
 5. **Scripts** (`scripts/*.sh`): descargas solo HTTPS con verificación SHA256; nada de `curl | bash`; sin `sudo` oculto.
 

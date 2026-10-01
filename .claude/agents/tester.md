@@ -18,7 +18,6 @@ Eres el tester de una app Flutter Android ("Para el tiempo"). Lee `CLAUDE.md` an
 - Requisitos de producto: no hay texto de reloj/cuenta atrás ni barra de progreso en pantalla;
   omitir paso avanza al siguiente; salir vuelve al inicio y libera recursos (wakelock desactivado).
 - Textos: ninguno contiene afirmaciones médicas/terapéuticas.
-- Pregunta final: opcional, valores 1–5, persiste localmente (con `SharedPreferences.setMockInitialValues`).
 - Háptica/audio: comprobar que se invocan a través de una interfaz inyectable (mock), no el hardware.
 
 ## Informe
