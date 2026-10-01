@@ -1,18 +1,27 @@
 import 'package:flutter/material.dart';
 
 import '../cues/sensory_cues.dart';
+import '../device/screen_awake.dart';
 import '../sequence/breathing.dart';
 import '../sequence/sequence.dart';
 import '../theme.dart';
 
 /// Reproduce la secuencia guiada. Sin reloj, cuenta atrás ni barra de progreso.
 class SequenceScreen extends StatefulWidget {
-  const SequenceScreen({super.key, this.sequence = defaultSequence, this.cues});
+  const SequenceScreen({
+    super.key,
+    this.sequence = defaultSequence,
+    this.cues,
+    this.screenAwake,
+  });
 
   final Sequence sequence;
 
   /// Vibración y sonido; por defecto [SensoryCues.instance].
   final SensoryCues? cues;
+
+  /// Pantalla encendida; por defecto [ScreenAwake.instance].
+  final ScreenAwake? screenAwake;
 
   static const exitButtonKey = Key('exit-button');
   static const circleKey = Key('breathing-circle');
@@ -25,6 +34,7 @@ class SequenceScreenState extends State<SequenceScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _clock;
   late final SensoryCues _cues = widget.cues ?? SensoryCues.instance;
+  late final ScreenAwake _screen = widget.screenAwake ?? ScreenAwake.instance;
 
   /// Último tramo en el que se emitió una señal, para emitir una sola vez por tramo.
   (int, int)? _cuedSegment;
@@ -43,11 +53,15 @@ class SequenceScreenState extends State<SequenceScreen>
         if (status == AnimationStatus.completed) _finish();
       })
       ..forward();
+    _screen.enable();
     _cues.anchor();
   }
 
+  /// Se ejecuta al salir por cualquier vía (Salir, atrás, fin): la pantalla vuelve a apagarse
+  /// según el sistema.
   @override
   void dispose() {
+    _screen.disable();
     _cues.stop();
     _clock.dispose();
     super.dispose();
@@ -68,17 +82,6 @@ class SequenceScreenState extends State<SequenceScreen>
       case null:
         break;
     }
-  }
-
-  /// Salta al inicio del siguiente paso (el botón llega en la fase 4).
-  void skipStep() {
-    final current = _sequence.positionAt(_elapsed).stepIndex;
-    if (current + 1 >= _sequence.steps.length) {
-      _clock.value = 1;
-      return;
-    }
-    final next = _sequence.startOf(current + 1);
-    _clock.forward(from: next.inMicroseconds / _sequence.total.inMicroseconds);
   }
 
   void _finish() {

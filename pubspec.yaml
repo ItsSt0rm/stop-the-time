@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   vibration: ^3.2.1
+  wakelock_plus: ^1.8.1
 
 dev_dependencies:
   flutter_test:

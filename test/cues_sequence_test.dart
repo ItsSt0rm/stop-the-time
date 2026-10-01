@@ -121,30 +121,21 @@ void main() {
   );
 
   testWidgets(
-    'skipStep() de entrada → apoyo → respiración: inhale al llegar el primer tramo, sin duplicados',
+    'la preparación de la respiración no vibra; inhale una vez al llegar a 25 s y exhale a 29 s',
     (tester) async {
       final fake = FakeCues();
       await tester.pumpWidget(MaterialApp(home: SequenceScreen(cues: fake)));
-      final state = tester.state<SequenceScreenState>(
-        find.byType(SequenceScreen),
-      );
 
-      await _record(tester, fake, [], const Duration(seconds: 1));
-      state.skipStep(); // entrada → apoyo (5 s)
-      await tester.pump(_tick);
-      state.skipStep(); // apoyo → respiración (20 s, preparación sin fase)
-      await tester.pump(_tick);
-      expect(fake.calls, ['anchor'], reason: 'la preparación no vibra');
-
-      // La preparación dura 5 s: justo antes aún nada, justo después el inhale.
       final log = <_Cue>[];
+      // 0–24.7 s: entrada, apoyo y preparación (20–25 s) sin señales.
       var now = await _record(
         tester,
         fake,
         log,
-        const Duration(milliseconds: 4700),
+        const Duration(milliseconds: 24700),
       );
-      expect(fake.calls, ['anchor']);
+      expect(fake.calls, ['anchor'], reason: 'la preparación no vibra');
+
       now = await _record(
         tester,
         fake,
@@ -153,10 +144,10 @@ void main() {
         start: now,
       );
       expect(fake.calls, ['anchor', 'inhale']);
-      expect(log.single.$2, closeTo(5.0, 0.25));
+      expect(log.single.$2, closeTo(25.0, 0.2));
 
-      // Toda la inhalación (4 s) sin repetir; luego un único exhale.
-      await _record(
+      // Toda la inhalación (hasta 28.8 s) sin repetir; luego un único exhale.
+      now = await _record(
         tester,
         fake,
         log,
@@ -164,8 +155,15 @@ void main() {
         start: now,
       );
       expect(fake.calls, ['anchor', 'inhale']);
-      await _record(tester, fake, log, const Duration(milliseconds: 600));
+      await _record(
+        tester,
+        fake,
+        log,
+        const Duration(milliseconds: 600),
+        start: now,
+      );
       expect(fake.calls, ['anchor', 'inhale', 'exhale']);
+      expect(log.last.$2, closeTo(29.0, 0.2));
     },
   );
 

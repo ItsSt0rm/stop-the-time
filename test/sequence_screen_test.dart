@@ -43,9 +43,6 @@ Future<void> _advance(
   }
 }
 
-/// Tiempo tras un cambio de frase para que acabe el fundido (900 ms).
-const _afterSwitch = Duration(seconds: 2);
-
 /// Tiempo tras un pop para que acabe el fundido de vuelta (600 ms) con margen.
 const _afterExit = Duration(seconds: 2);
 
@@ -270,58 +267,6 @@ void main() {
     expect(find.byType(HomeScreen), findsOneWidget);
   });
 
-  testWidgets('skipStep() avanza al inicio del paso siguiente', (tester) async {
-    await _pumpSequence(tester);
-    final state = tester.state<SequenceScreenState>(
-      find.byType(SequenceScreen),
-    );
-
-    // Entrada (1 s) -> apoyo.
-    await _advance(tester, const Duration(seconds: 1));
-    state.skipStep();
-    await _advance(tester, _afterSwitch);
-    expect(find.text(_textOf(StepKind.apoyo)), findsOneWidget);
-
-    // Apoyo -> preparación de la respiración (sin esperar a los 20 s).
-    state.skipStep();
-    await _advance(tester, _afterSwitch);
-    expect(find.text(_textOf(StepKind.respiracion)), findsOneWidget);
-    expect(find.text(_textOf(StepKind.apoyo)), findsNothing);
-
-    // Respiración -> escaneo (primera zona).
-    state.skipStep();
-    await _advance(tester, _afterSwitch);
-    expect(find.text(_textOf(StepKind.escaneo)), findsOneWidget);
-
-    // Escaneo -> grounding -> cierre.
-    state.skipStep();
-    await _advance(tester, _afterSwitch);
-    expect(find.text(_textOf(StepKind.grounding)), findsOneWidget);
-    state.skipStep();
-    await _advance(tester, _afterSwitch);
-    expect(find.text(_textOf(StepKind.cierre)), findsOneWidget);
-  });
-
-  testWidgets('skipStep() en el último paso termina y vuelve al inicio', (
-    tester,
-  ) async {
-    await _openFromHome(tester);
-    final state = tester.state<SequenceScreenState>(
-      find.byType(SequenceScreen),
-    );
-    for (var i = 0; i < defaultSequence.steps.length - 1; i++) {
-      state.skipStep();
-      await _advance(tester, const Duration(seconds: 1));
-    }
-    expect(find.text(_textOf(StepKind.cierre)), findsOneWidget);
-    expect(find.byType(SequenceScreen), findsOneWidget);
-
-    state.skipStep();
-    await _advance(tester, _afterExit);
-    expect(find.byType(SequenceScreen), findsNothing);
-    expect(find.byType(HomeScreen), findsOneWidget);
-  });
-
   testWidgets('sin barra de progreso ni texto de reloj en ningún momento', (
     tester,
   ) async {
@@ -340,6 +285,44 @@ void main() {
           reason: 'a los $second s aparece "$text"',
         );
       }
+      await tester.pump(const Duration(seconds: 1));
+    }
+  });
+
+  testWidgets('no hay opción de omitir: solo el botón "Salir"', (tester) async {
+    final skipLike = RegExp(r'omitir|saltar|siguiente', caseSensitive: false);
+    await _pumpSequence(tester);
+    final inSequence = find.byType(SequenceScreen);
+
+    for (var second = 0; second < 90; second++) {
+      for (final rich in tester.widgetList<RichText>(
+        find.descendant(of: inSequence, matching: find.byType(RichText)),
+      )) {
+        final text = rich.text.toPlainText();
+        expect(
+          skipLike.hasMatch(text),
+          isFalse,
+          reason: 'a los $second s aparece "$text"',
+        );
+      }
+      for (final tip in tester.widgetList<Tooltip>(find.byType(Tooltip))) {
+        expect(skipLike.hasMatch(tip.message ?? ''), isFalse);
+      }
+
+      final buttons = find.descendant(
+        of: inSequence,
+        matching: find.bySubtype<ButtonStyleButton>(),
+      );
+      expect(buttons, findsOneWidget, reason: 'a los $second s');
+      expect(tester.widget(buttons), isA<TextButton>());
+      expect(
+        find.descendant(of: buttons, matching: find.text('Salir')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: inSequence, matching: find.byType(IconButton)),
+        findsNothing,
+      );
       await tester.pump(const Duration(seconds: 1));
     }
   });

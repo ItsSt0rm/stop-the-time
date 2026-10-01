@@ -7,10 +7,11 @@ inicia una secuencia guiada de ~90 s orientada a modificar el tiempo percibido y
 - **Sin afirmaciones médicas ni terapéuticas** en ningún texto (UI, README, comentarios visibles).
   Nada de "reduce ansiedad", "trata", "cura", "terapia", "clínicamente".
 - Sin reloj, sin cuenta regresiva, sin barra de progreso visibles.
-- Pantalla oscura y de baja estimulación. El efecto de oscurecido total es **solo** en la entrada (0–5 s).
+- Pantalla oscura y de baja estimulación. Cualquier efecto de apagado es **solo** en la entrada (0–5 s).
 - Círculo de respiración: crece al inhalar (4 s), se encoge al exhalar (6 s). Movimiento lento, bajo contraste.
 - Pantalla encendida solo mientras corre la secuencia.
-- Cualquier paso se puede omitir y se puede salir en cualquier momento (incluido el botón atrás).
+- Se puede salir en cualquier momento ("Salir" o botón/gesto atrás). **No hay opción de omitir pasos**
+  (decisión de la persona usuaria en la fase 4; sustituye al requisito original de "omitir").
 - Pregunta final opcional 1–5 "¿Qué tan presente te sentiste?", guardada **solo en el dispositivo**.
 - Sin cuentas, sin analítica, sin red. El APK de release **no** debe declarar `android.permission.INTERNET`.
 - Todos los recursos (audio, fuentes) van empaquetados; nada se descarga en tiempo de ejecución.
@@ -46,7 +47,10 @@ no dispersa en widgets, para poder testear la temporización.
   cada extremo del círculo (las rampas largas se sentían anticlimáticas). Sonido del ancla: preset "soplo".
 - Audio: solo `AssetSource` (nunca `UrlSource`/`setSourceUrl`). El ancla se genera con
   `scripts/generate_anchor_sound.py` (determinista; su sha256 lo fija `test/anchor_asset_test.dart`).
-- Vibración y sonido pasan por la interfaz `SensoryCues`; los tests usan `FakeCues` (test/flutter_test_config.dart).
+- Vibración, sonido y pantalla encendida pasan por interfaces (`SensoryCues`, `ScreenAwake`); los tests usan
+  dobles (`FakeCues`, `FakeScreenAwake`) asignados en `test/flutter_test_config.dart`.
+- `wakelock_plus` en Android solo activa `FLAG_KEEP_SCREEN_ON` en la ventana (sin permisos); se activa al
+  entrar en la secuencia y se desactiva en `dispose` (Salir, atrás o fin).
 
 ## Entorno de compilación
 - Windows tiene **Smart App Control** activo y bloquea el Dart SDK de Windows. **No se desactiva.**
@@ -62,7 +66,7 @@ no dispersa en widgets, para poder testear la temporización.
 
 ## Forma de trabajo
 - Fases pequeñas: (0) entorno, (1) base con botón, (2) secuencia + temporización, (3) háptica y audio,
-  (4) pantalla encendida + omitir/salir, (5) pregunta final local, (6) APK instalable.
+  (4) pantalla encendida + salir, (5) pregunta final local, (6) APK instalable.
 - Al terminar cada fase: explicar exactamente cómo probarla.
 - Si algo no se sabe, verificarlo en la documentación oficial; no inventar APIs.
 - Explicaciones breves de decisiones importantes (la persona usuaria viene de Power Platform/Python
