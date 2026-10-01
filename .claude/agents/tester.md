@@ -16,7 +16,7 @@ Eres el tester de una app Flutter Android ("Para el tiempo"). Lee `CLAUDE.md` an
 ## Qué cubrir según fase
 - Temporización: suma total ≈ 90 s, límites de cada tramo, 3–4 ciclos 4 s/6 s en respiración.
 - Requisitos de producto: no hay texto de reloj/cuenta atrás ni barra de progreso en pantalla;
-  omitir paso avanza al siguiente; salir vuelve al inicio y libera recursos (wakelock desactivado).
+  no hay botón de omitir; salir vuelve al inicio y libera recursos (wakelock desactivado).
 - Textos: ninguno contiene afirmaciones médicas/terapéuticas.
 - Háptica/audio: comprobar que se invocan a través de una interfaz inyectable (mock), no el hardware.
 

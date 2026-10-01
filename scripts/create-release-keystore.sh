@@ -17,6 +17,7 @@ read -rsp "Contraseña de la keystore (mínimo 12 caracteres, sin '\\'): " pw; e
 read -rsp "Repítela: " pw2; echo
 [ "$pw" = "$pw2" ] || { echo "No coinciden." >&2; exit 1; }
 [ "${#pw}" -ge 12 ] || { echo "Demasiado corta." >&2; exit 1; }
+LC_ALL=C; case "$pw" in *[![:print:]]*) echo "Usa solo caracteres ASCII (sin ñ ni tildes): Gradle lee el archivo en ISO-8859-1." >&2; exit 1 ;; esac
 case "$pw" in *\\*) echo "No uses '\\' (rompe el archivo de propiedades)." >&2; exit 1 ;; esac
 
 umask 077
