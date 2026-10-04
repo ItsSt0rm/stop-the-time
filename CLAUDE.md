@@ -80,7 +80,8 @@ no dispersa en widgets, para poder testear la temporización.
 - Keystore de release fuera del repo (`~/.keystores/` en WSL). `key.properties`, `*.jks`, `*.keystore` en `.gitignore`.
 - Nunca commitear secretos. Revisar el manifiesto combinado de release antes de entregar un APK.
 
-## Estado (2026-09-30)
+## Estado (2026-10-04)
+- Versiones: v1.0.0 (secuencia) y **v1.1.0** (logo "anillo y punto" + recordatorios tipo alarma).
 - Fases 0–4 terminadas y validadas en el A55 (último commit de la fase 4: "Fase 4: pantalla encendida…").
 - Fase 5 (pregunta 1–5) **descartada** por la persona usuaria: la funcionalidad está completa.
 - Fase 6 hecha: repo público https://github.com/ItsSt0rm/stop-the-time (MIT), página de descarga en `docs/`
@@ -91,7 +92,9 @@ no dispersa en widgets, para poder testear la temporización.
   (WSL), creada con `scripts/create-release-keystore.sh`; copia cifrada con gpg en OneDrive. Sin keystore el release falla.
 - Commits con el correo noreply de GitHub (configurado en el repo); nunca el correo personal.
 - Para una versión nueva: subir `version` en `pubspec.yaml` (el `+N` debe crecer), compilar, `aapt2 dump permissions`,
-  `security-reviewer`, y crear release con tag `vX.Y.Z`.
+  `security-reviewer`, y crear release con tag `vX.Y.Z`. Activos: copiar el APK a `build/release/para-el-tiempo.apk`
+  y generar `SHA256SUMS` con `sha256sum para-el-tiempo.apk`. Sin `gh` instalado, el release se crea en la web
+  de GitHub (la persona sube los dos archivos).
 - Desde Git Bash, llamar a WSL con `MSYS_NO_PATHCONV=1` o Git Bash reescribe las rutas `/mnt/...`.
 
 ## Forma de trabajo
