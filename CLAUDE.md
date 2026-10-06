@@ -91,7 +91,7 @@ no dispersa en widgets, para poder testear la temporización.
   `flutter build apk --release --target-platform android-arm,android-arm64` (el APK excluye x86/x86_64 en `packaging.jniLibs`). Firma: `~/.keystores/para-el-tiempo.{jks,properties}`
   (WSL), creada con `scripts/create-release-keystore.sh`; copia cifrada con gpg en OneDrive. Sin keystore el release falla.
 - Commits con el correo noreply de GitHub (configurado en el repo); nunca el correo personal.
-- Para una versión nueva: subir `version` en `pubspec.yaml` (el `+N` debe crecer), compilar, `aapt2 dump permissions`,
+- Para una versión nueva: subir `version` en `pubspec.yaml` (el `+N` debe crecer), compilar, `aapt2 dump permissions`, comprobar que `unzip -l app-release.apk | grep lib/` solo lista `arm64-v8a` y `armeabi-v7a` (cada una con `libflutter.so`),
   `security-reviewer`, y crear release con tag `vX.Y.Z`. Activos: copiar el APK a `build/release/para-el-tiempo.apk`
   y generar `SHA256SUMS` con `sha256sum para-el-tiempo.apk`. Sin `gh` instalado, el release se crea en la web
   de GitHub (la persona sube los dos archivos).
