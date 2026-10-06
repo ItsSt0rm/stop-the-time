@@ -87,8 +87,8 @@ no dispersa en widgets, para poder testear la temporización.
 - Fase 6 hecha: repo público https://github.com/ItsSt0rm/stop-the-time (MIT), página de descarga en `docs/`
   (GitHub Pages), APK en GitHub Releases como `para-el-tiempo.apk` + `SHA256SUMS` (el enlace
   `releases/latest/download/para-el-tiempo.apk` de la página depende de ese nombre exacto).
-- `applicationId` = `io.github.itsst0rm.paraeltiempo`. Release solo arm64:
-  `flutter build apk --release --target-platform android-arm64`. Firma: `~/.keystores/para-el-tiempo.{jks,properties}`
+- `applicationId` = `io.github.itsst0rm.paraeltiempo`. Release ARM 32 + 64 bits (desde v1.1.1; los Samsung económicos suelen ser de 32 bits):
+  `flutter build apk --release --target-platform android-arm,android-arm64` (el APK excluye x86/x86_64 en `packaging.jniLibs`). Firma: `~/.keystores/para-el-tiempo.{jks,properties}`
   (WSL), creada con `scripts/create-release-keystore.sh`; copia cifrada con gpg en OneDrive. Sin keystore el release falla.
 - Commits con el correo noreply de GitHub (configurado en el repo); nunca el correo personal.
 - Para una versión nueva: subir `version` en `pubspec.yaml` (el `+N` debe crecer), compilar, `aapt2 dump permissions`,

@@ -39,6 +39,16 @@ android {
         versionName = flutter.versionName
     }
 
+    // Solo las ABI para las que se compila el motor de Flutter (--target-platform android-arm,android-arm64).
+    // Dependencias como datastore traen .so para otras ABI; si el APK incluye una ABI sin libflutter.so,
+    // Android puede elegirla y la app se cierra al abrir (pasó en v1.1.0 con un teléfono de 32 bits).
+    // (ndk.abiFilters no sirve aquí: el plugin de Flutter lo sobrescribe.)
+    packaging {
+        jniLibs {
+            excludes += listOf("lib/x86/**", "lib/x86_64/**")
+        }
+    }
+
     signingConfigs {
         if (keystorePropsFile.exists()) {
             create("release") {

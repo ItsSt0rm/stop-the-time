@@ -20,7 +20,7 @@ a propósito: nunca se firma con la clave de debug.
 
 ```bash
 bash scripts/create-release-keystore.sh   # una sola vez; pide la contraseña
-flutter build apk --release --target-platform android-arm64
+flutter build apk --release --target-platform android-arm,android-arm64
 # APK: build/app/outputs/flutter-apk/app-release.apk
 ```
 
